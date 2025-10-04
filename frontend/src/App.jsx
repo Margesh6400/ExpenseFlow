@@ -3,19 +3,18 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
-import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import ManagerDashboard from './pages/ManagerDashboard';
+import EmployeeDashboard from './pages/EmployeeDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
-// Smart Dashboard Router
+// Smart Dashboard Router - handles role-based routing
 const DashboardRouter = () => {
   const { user } = useAuth();
   
-  if (user?.role === 'admin') {
-    return <AdminDashboard />;
-  }
-  
-  return <Dashboard />;
+  if (user?.role === 'admin') return <AdminDashboard />;
+  if (user?.role === 'manager') return <ManagerDashboard />;
+  return <EmployeeDashboard />;
 };
 
 function App() {
@@ -24,9 +23,12 @@ function App() {
       <AuthProvider>
         <Toaster position="top-right" />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* Protected Dashboard Route - Automatically routes to correct dashboard based on user role */}
           <Route
             path="/dashboard"
             element={
@@ -35,6 +37,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Redirect any unknown routes to dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
